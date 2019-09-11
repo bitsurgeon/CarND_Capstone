@@ -111,10 +111,10 @@ class DBWNode(object):
         self.angular_vel = msg.twist.angular.z
 
     def current_vel_cb(self, msg):
-    	self.current_vel = msg.twist.linear.x
+        self.current_vel = msg.twist.linear.x
 
     def dbw_enable_cb(self, msg):
-	    self.dbw_enabled = msg
+        self.dbw_enabled = msg
 
 if __name__ == '__main__':
     DBWNode()

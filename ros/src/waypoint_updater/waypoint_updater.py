@@ -45,7 +45,7 @@ class WaypointUpdater(object):
         self.base_waypoints = None
         self.waypoints_2d = None
         self.waypoints_tree = None
-
+        
         # rospy.spin()
         self.loop() # replace the above rospy.spin() to get flexibility for rate control
 
@@ -94,8 +94,9 @@ class WaypointUpdater(object):
         self.pose = msg
 
     def waypoints_cb(self, waypoints):
-        # store the base wayppoints received
+        # store the base wayppoints received, done only once
         self.base_waypoints = waypoints
+        
         # store these waypoints in KDTree for efficient search of closest waypoint later
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
