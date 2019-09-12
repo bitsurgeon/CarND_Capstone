@@ -175,7 +175,7 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        if(self.pose and self.waypoints_tree):
+        if(self.pose):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             # find the closest visible traffic light (if one exists)
@@ -196,8 +196,6 @@ class TLDetector(object):
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
 
-        # ? reset waypoints
-        # self.waypoints = None
         return -1, TrafficLight.UNKNOWN
 
 if __name__ == '__main__':
