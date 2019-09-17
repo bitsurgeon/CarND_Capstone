@@ -13,6 +13,7 @@ import yaml
 
 from scipy.spatial import KDTree
 import numpy as np
+from tl_extractor import TLExtractor
 
 STATE_COUNT_THRESHOLD = 3
 IMG_SKIP = 2
@@ -48,6 +49,7 @@ class TLDetector(object):
 
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
+        self.light_extractor = TLExtractor()
         self.listener = tf.TransformListener()
 
         self.has_image = False
@@ -88,6 +90,8 @@ class TLDetector(object):
         if (np.mod(self.img_cnt, IMG_SKIP) == 0):
             self.has_image = True
             self.camera_image = msg
+            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+            cv2.imwrite('debug/cam_img_' + str(self.img_cnt) + '.png', cv_image)
             light_wp, state = self.process_traffic_lights()
 
             '''
