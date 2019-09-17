@@ -83,9 +83,18 @@ class TLExtractor(object):
                 tf.import_graph_def(od_graph_def, name='')
 
         return graph
+    
+    def crop_boxes(self, image, boxes, classes, target):
+        """Crop bounding boxes on the image that first matching target"""
+        for i in range(len(boxes)):
+            bot, left, top, right = boxes[i, ...]
+            class_id = int(classes[i])
+            if class_id == target:
+                return image.crop((left, bot, right, top))
+        return False
 
     def extract_traffic_light_image(self, image, confidence_cutoff=0.9):
-        """Extract traffic light from camera image."""        
+        """Extract traffic light from camera image."""
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
         with tf.Session(graph=self.detection_graph) as sess:                
@@ -106,21 +115,22 @@ class TLExtractor(object):
             width, height = image.size
             box_coords = self.to_image_coords(boxes, height, width)
 
-            # Each class with be represented by a differently colored box
-            self.draw_boxes(image, box_coords, classes)
+            # # Each class with be represented by a differently colored box
+            # self.draw_boxes(image, box_coords, classes)
 
-            # # debug
-            # print(classes)
-            # print(scores)
+            # Crop traffic light
+            image_crop = self.crop_boxes(image, box_coords, classes, target=TL_CLASS_ID)
+
+        return image_crop
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     image = Image.open('./model/tl_r.jpg')
     # image = Image.open('./model/tl_g.jpg')
-    TLExtractor().extract_traffic_light_image(image)
-
-    plt.style.use('ggplot')
-    plt.figure(figsize=(12, 8))
-    plt.imshow(image)
-    plt.show()
+    image_crop = TLExtractor().extract_traffic_light_image(image)
+    if image_crop:
+        plt.style.use('ggplot')
+        plt.figure(figsize=(12, 8))
+        plt.imshow(image_crop)
+        plt.show()

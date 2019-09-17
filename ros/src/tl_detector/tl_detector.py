@@ -90,8 +90,11 @@ class TLDetector(object):
         if (np.mod(self.img_cnt, IMG_SKIP) == 0):
             self.has_image = True
             self.camera_image = msg
+            
+            # dump camera image for model training
             cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
             cv2.imwrite('debug/cam_img_' + str(self.img_cnt) + '.png', cv_image)
+
             light_wp, state = self.process_traffic_lights()
 
             '''
@@ -154,18 +157,22 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        # for simulator testing only
-        return light.state
+        # # for simulator testing only
+        # return light.state
 
-        # # for real life classification
-        # if(not self.has_image):
-        #     self.prev_light_loc = None
-        #     return False
+        # for real life classification
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return False
 
-        # cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        # matching image format for TLExtractor
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
 
-        # #Get classification
-        # return self.light_classifier.get_classification(cv_image)
+        # extract traffic light
+        tl_image = TLExtractor().extract_traffic_light_image(cv_image)
+
+        # Get classification
+        return self.light_classifier.get_classification(tl_image)
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
