@@ -145,8 +145,13 @@ class TLDetector(object):
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
-        cv2.imwrite('cam_img_' + str(self.img_cnt) + '.png', cv_image)
-
+        if light.state == TrafficLight.YELLOW:
+            cv2.imwrite('sim_images/yellow/cam_img_' + str(self.img_cnt) + '.png', cv_image)
+        if light.state == TrafficLight.RED:
+            cv2.imwrite('sim_images/red/cam_img_' + str(self.img_cnt) + '.png', cv_image)
+        if light.state == TrafficLight.GREEN:
+            cv2.imwrite('sim_images/green/cam_img_' + str(self.img_cnt) + '.png', cv_image)
+        
         #Get classification
         return self.light_classifier.get_classification(cv_image)
 
