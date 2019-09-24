@@ -5,6 +5,7 @@ devel
 
 profile.tmp
 
+debug
 *.bag
 
 .vscode
