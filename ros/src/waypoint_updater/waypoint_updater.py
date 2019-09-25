@@ -96,18 +96,13 @@ class WaypointUpdater(object):
         return closest_idx
 
     def publish_waypoints(self, closest_idx):
-        # # ignore the traffic light
-        # lane = Lane()
-        # lane.header = self.base_waypoints.header
-        # # take the required waypoints ahead of the car
-        # lane.waypoints = self.base_waypoints.waypoints[closest_idx : closest_idx+LOOKAHEAD_WPS]
-        # self.final_waypoints_pub.publish(lane)
-
-        # obey the traffic light
-        if self.stopline_wp_idx:
-            final_lane = self.generate_lane(closest_idx)
-            self.final_waypoints_pub.publish(final_lane)
-
+#        lane = Lane()
+#        lane.header = self.base_waypoints.header
+#        lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx + LOOKAHEAD_WPS]
+#        self.final_waypoints_pub.publish(lane)
+        final_lane = self.generate_lane(closest_idx)
+        self.final_waypoints_pub.publish(final_lane)
+    
     def generate_lane(self, closest_idx):
         lane = Lane()
         #lane.header = self.base_waypoints.header
