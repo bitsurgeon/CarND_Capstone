@@ -45,7 +45,7 @@ class WaypointUpdater(object):
         self.base_waypoints = None
         self.waypoints_2d = None
         self.waypoints_tree = None
-        self.stopline_wp_idx = None
+        self.stopline_wp_idx = -1
         
         # rospy.spin()
         self.loop() # replace the above rospy.spin() to get flexibility for rate control
@@ -91,10 +91,9 @@ class WaypointUpdater(object):
         # lane.waypoints = self.base_waypoints.waypoints[closest_idx : closest_idx+LOOKAHEAD_WPS]
         # self.final_waypoints_pub.publish(lane)
 
-        # obey the traffic light
-        if self.stopline_wp_idx:
-            final_lane = self.generate_lane(closest_idx)
-            self.final_waypoints_pub.publish(final_lane)
+     
+        final_lane = self.generate_lane(closest_idx)
+        self.final_waypoints_pub.publish(final_lane)
 
     def generate_lane(self, closest_idx):
         lane = Lane()
@@ -119,7 +118,7 @@ class WaypointUpdater(object):
             p.pose = wp.pose
 
             # calculate in how many waypoints, the car need to stop
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 3, 0) # 3 waypoints back for the car nose stop before the stop line.
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) #2  waypoints back for the car nose stop before the stop line.
 
             # the distance between the waypoint to the stop waypoint
             dist = self.distance(waypoints, i, stop_idx)
