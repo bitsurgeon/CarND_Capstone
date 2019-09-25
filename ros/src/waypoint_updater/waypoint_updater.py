@@ -118,7 +118,7 @@ class WaypointUpdater(object):
             p.pose = wp.pose
 
             # calculate in how many waypoints, the car need to stop
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) # 3 waypoints back for the car nose stop before the stop line.
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) #2  waypoints back for the car nose stop before the stop line.
 
             # the distance between the waypoint to the stop waypoint
             dist = self.distance(waypoints, i, stop_idx)
