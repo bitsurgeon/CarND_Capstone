@@ -8,7 +8,7 @@ Team member:
 * Rajiv Sreedhar
 * Pradhap Moorthi
 
-- [Overall Structure](#heading)
+- [Overall Structure](#overall)
   * [Perception](#sub-heading)
     + [Traffic Light Detection](#sub-sub-heading)
     + [Traffic Light Classification](#sub-sub-heading)
@@ -19,9 +19,9 @@ Team member:
     + [DBW](#sub-sub-heading)
     + [Waypoint Follower](#sub-sub-heading)
 
-- [Environment](#heading-1)
+- [Environment](#env)
 <!-- toc -->
-
+<a name="overall"></a>
 ## Overall Structure
 In this project, we used ROS nodes to implement the core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. The following is a system architecture diagram showing the [ROS](http://wiki.ros.org/) nodes and topics used in the project. 
 
@@ -74,6 +74,7 @@ Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake
 #### Waypoint Follower
 A package containing code from Autoware which subscribes to /final_waypoints and publishes target vehicle linear and angular velocities in the form of twist commands to the /twist_cmd topic. 
 
+<a name="env"></a>
 ## Environment
 
 Please use **one** of the two installation options, either native **or** docker installation.
