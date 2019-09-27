@@ -1,57 +1,78 @@
+# Udacity Capstone Project Team Doudoufei
+> This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+
+Team member:
+* Yongzhi Liu
+* Yan Zhang
+* Yanyan PENG
+* Rajiv Sreedhar
+* Pradhap Moorthi
+
 - [Overall Structure](#heading)
   * [Perception](#sub-heading)
     + [Traffic Light Detection](#sub-sub-heading)
+    + [Traffic Light Classification](#sub-sub-heading)
   * [Planning](#sub-heading)
     + [Waypoint Loader](#sub-sub-heading)
-	+ [Waypoint Updater](#sub-sub-heading)
+    + [Waypoint Updater](#sub-sub-heading)
   * [Control](#sub-heading)
     + [DBW](#sub-sub-heading)
-	+ [Waypoint Follower](#sub-sub-heading)
+    + [Waypoint Follower](#sub-sub-heading)
 
 - [Environment](#heading-1)
-  * [Sub-heading](#sub-heading-1)
-    + [Sub-sub-heading](#sub-sub-heading-1)
-
-# Heading levels
-
-> This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
-
-
 <!-- toc -->
 
 ## Overall Structure
+In this project, we used ROS nodes to implement the core functionality of the autonomous vehicle system, including traffic light detection, control, and waypoint following. The following is a system architecture diagram showing the [ROS](http://wiki.ros.org/) nodes and topics used in the project. 
 
-This is an h1 heading
+![System architecture Diagram](imgs/final-project-ros-graph-v2.png)
 
 ### Perception
+In this project, the perception is mainly from camera images for traffic light detection. The self driving car for this project is mainly for highway or test site without any obstacle. So no obstacle detection is considered.
 
-This is an h2 heading
+#### Traffic Light Detection (tl_detector.py + tl_classfier.py)
+* Input: 
+  * /image_color: 
+  * /current_pose: the vehicle's current position,
+  * /base_waypoints: a complete list of reference waypoints the car will be following,
+* Output: 
+  * /traffic_waypoint: the locations to stop for red traffic lights
 
-#### Traffic Light Detection
+The traffic light detection node is within the tl_detector.py, and the traffic light classification node is within /tl_detector/light_classification_model/tl_classfier.py.
 
-This is an h3 heading
+#### Traffic Light Classification
 
-### Planning
+### Planning 
 
-This is an h2 heading
+The path planning for this project is simply to produce a trajectory that obeys the traffic light.
 
 #### Waypoint Loader
+A package which loads the static waypoint data and publishes to /base_waypoints.
 
-This is an h3 heading
+#### Waypoint Updater (waypoint_updater.py)
+The purpose of this node is to update the target velocity property of each waypoint based on traffic light data. 
+* Input: 
+  * /base_waypoints, 
+  * /current_pose, 
+  * /traffic_waypoint
+* Output: 
+  * /final_waypoints: a list of waypoints ahead of the car with target velocities.
 
-#### Waypoint Updater
-This is an h3 heading
-
-### Control
-
-This is an h2 heading
+### Control (twist_controller.py)
+Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake, and steering have electronic control. This package contains the files that are responsible for control of the vehicle: the node dbw_node.py and the file twist_controller.py, along with a pid and lowpass filter.
 
 #### DBW
-
-This is an h3 heading
+* Input:
+  * /current_velocity
+  * /twist_cmd: target linear and angular velocities. 
+  * /vehicle/dbw_enabled: indicates if the car is under dbw or manual driver control. 
+* Output:
+  * /vehicle/throttle_cmd
+  * /vehicle/brake_cmd
+  * /vehicle/steering_cmd
 
 #### Waypoint Follower
-
+A package containing code from Autoware which subscribes to /final_waypoints and publishes target vehicle linear and angular velocities in the form of twist commands to the /twist_cmd topic. 
 
 ## Environment
 
