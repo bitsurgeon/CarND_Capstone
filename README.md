@@ -8,18 +8,19 @@ Team member:
 * Rajiv Sreedhar
 * Pradhap Moorthi
 
-- [Overall Structure](#overall)
-  * [Perception](#sub-heading)
-    + [Traffic Light Detection](#sub-sub-heading)
-    + [Traffic Light Classification](#sub-sub-heading)
-  * [Planning](#sub-heading)
-    + [Waypoint Loader](#sub-sub-heading)
-    + [Waypoint Updater](#sub-sub-heading)
-  * [Control](#sub-heading)
-    + [DBW](#sub-sub-heading)
-    + [Waypoint Follower](#sub-sub-heading)
+# Table of contents
+[Overall Structure](#overall)
+  * [Perception](#perception)
+    + [Traffic Light Detection](#tl-detection)
+    + [Traffic Light Classification](#tl-classification)
+  * [Planning](#planning)
+    + [Waypoint Loader](#waypoint-loader)
+    + [Waypoint Updater](#waypoint-updater)
+  * [Control](#control)
+    + [DBW](#dbw)
+    + [Waypoint Follower](#waypoint-follower)
 
-- [Environment](#env)
+[Environment](#env)
 <!-- toc -->
 <a name="overall"></a>
 ## Overall Structure
@@ -27,12 +28,14 @@ In this project, we used ROS nodes to implement the core functionality of the au
 
 ![System architecture Diagram](imgs/final-project-ros-graph-v2.png)
 
+<a name="perception"></a>
 ### Perception
 In this project, the perception is mainly from camera images for traffic light detection. The self driving car for this project is mainly for highway or test site without any obstacle. So no obstacle detection is considered.
 
+<a name="tl-detection"></a>
 #### Traffic Light Detection (tl_detector.py + tl_classfier.py)
 * Input: 
-  * /image_color: 
+  * /image_color: colored images from camera,
   * /current_pose: the vehicle's current position,
   * /base_waypoints: a complete list of reference waypoints the car will be following,
 * Output: 
@@ -40,17 +43,25 @@ In this project, the perception is mainly from camera images for traffic light d
 
 The traffic light detection node is within the tl_detector.py, and the traffic light classification node is within /tl_detector/light_classification_model/tl_classfier.py.
 
+<a name="tl-classification"></a>
 #### Traffic Light Classification
 
+<a name="planning"></a>
 ### Planning 
 
-The path planning for this project is simply to produce a trajectory that obeys the traffic light.
+The path planning for this project is simply to produce a trajectory that obeys the traffic light. The resulting waypoints
+are the green points ahead of the car as shown in the snapshot below.
+
+![final waypoints](imgs/final-waypoints.jpg)
+
 
 #### Waypoint Loader
 A package which loads the static waypoint data and publishes to /base_waypoints.
 
+<a name="waypoint-updater"></a>
 #### Waypoint Updater (waypoint_updater.py)
-The purpose of this node is to update the target velocity property of each waypoint based on traffic light data. 
+The purpose of this node is to update the target velocity property of each waypoint based on traffic light data. The detected traffic light is used in this node to determine if the car need to stop for red light or continue to drive. The corresponding velocities are calculated for each waypoint ahead of the car.
+
 * Input: 
   * /base_waypoints, 
   * /current_pose, 
@@ -58,10 +69,14 @@ The purpose of this node is to update the target velocity property of each waypo
 * Output: 
   * /final_waypoints: a list of waypoints ahead of the car with target velocities.
 
-### Control (twist_controller.py)
+<a name="control"></a>
+### Control (dbw_node.py + twist_controller.py)
 Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake, and steering have electronic control. This package contains the files that are responsible for control of the vehicle: the node dbw_node.py and the file twist_controller.py, along with a pid and lowpass filter.
 
+<a name="dbw"></a>
 #### DBW
+This node should only publish the control commands when dbw_enabled is true to avoid error accumulation in manual mode. The DBW node uses a PID controller to control the throttle.
+
 * Input:
   * /current_velocity
   * /twist_cmd: target linear and angular velocities. 
@@ -71,6 +86,7 @@ Carla is equipped with a drive-by-wire (dbw) system, meaning the throttle, brake
   * /vehicle/brake_cmd
   * /vehicle/steering_cmd
 
+<a name="waypoint-follower"></a>
 #### Waypoint Follower
 A package containing code from Autoware which subscribes to /final_waypoints and publishes target vehicle linear and angular velocities in the form of twist commands to the /twist_cmd topic. 
 
