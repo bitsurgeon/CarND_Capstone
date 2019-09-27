@@ -52,7 +52,7 @@ The traffic light detection node is within the tl_detector.py, and the traffic l
 The path planning for this project is simply to produce a trajectory that obeys the traffic light. The resulting waypoints
 are the green points ahead of the car as shown in the snapshot below.
 
-![final waypoints](imgs/final-waypoints.jpg)
+![final waypoints](imgs/waypoints.JPG)
 
 
 #### Waypoint Loader
