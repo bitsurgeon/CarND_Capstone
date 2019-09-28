@@ -14,7 +14,7 @@ class TLClassifier(object):
         else:
             PATH_TO_FROZEN_GRAPH = 'light_classification/model/sim_model/'
         FROZEN_GRAPH = PATH_TO_FROZEN_GRAPH + 'frozen_inference_graph.pb'
-	rospy.loginfo("loading graph............")
+	rospy.loginfo("loading classification graph............")
         self.graph = tf.Graph()
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -78,9 +78,6 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
         """
         image = np.dstack((image[:, :, 2], image[:, :, 1], image[:, :, 0]))
-        width = image.shape[1]
-        height = image.shape[0]
-        #rospy.loginfo("Width: %r, height: %r" % (width, height))
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
         with tf.Session(graph=self.graph) as sess:                
