@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 import cv2 
 import rospy
+import time
 
 LIGHTS = ['Green', 'Yellow', 'Red', 'Unknown']
 
@@ -69,7 +70,7 @@ class TLClassifier(object):
         return filtered_boxes, filtered_scores, filtered_classes
 
 
-    def get_classification(self, image, is_site):
+    def get_classification(self, image):
         """Determines the color of the traffic light in the image
         Args:
             image (cv::Mat): image containing the traffic light
@@ -77,17 +78,20 @@ class TLClassifier(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
         """
         image = np.dstack((image[:, :, 2], image[:, :, 1], image[:, :, 0]))
-        if is_site:
-            width = image.shape[1]
-            height = image.shape[0]
-            #rospy.loginfo("Width: %r, height: %r" % (width, height))
-            image = image[:int(height/2), :, :]
+        width = image.shape[1]
+        height = image.shape[0]
+        #rospy.loginfo("Width: %r, height: %r" % (width, height))
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
         with tf.Session(graph=self.graph) as sess:                
             # Actual detection.
+	    time0 = time.time()
             (boxes, scores, classes) = sess.run([self.detection_boxes, self.detection_scores, self.detection_classes], 
                                                 feed_dict={self.image_tensor: image_np})
+
+            time1 = time.time()
+            print("Prediction time in milliseconds", (time1 - time0) * 1000)
+
             # Remove unnecessary dimensions
             boxes = np.squeeze(boxes)
             scores = np.squeeze(scores)
@@ -97,26 +101,19 @@ class TLClassifier(object):
             # Filter boxes with a confidence score less than `confidence_cutoff`
             boxes, scores, classes = self.filter_boxes(confidence_cutoff, boxes, scores, classes)
         
-        # Write image to disk
-        write = False
-        if write:
-            image = np.dstack((image[:, :, 2], image[:, :, 1], image[:, :, 0]))
-            #cv2.imwrite('/home/jose/GitHub/Self-Driving-Car-Nanodegree-Capstone/images/img_raw.jpg', image)
-            width, height = image.shape[1], image.shape[0]
-            box_coords = self.to_image_coords(boxes, height, width) 
-            self.draw_boxes(image, box_coords, classes, scores)
-            cv2.imwrite('/home/jose/GitHub/Self-Driving-Car-Nanodegree-Capstone/images/img.jpg', image)
         
-        
-        if len(scores)>0:
+        if len(classes)>0:
             color_state = int(classes[np.argmax(scores)])
             
             if color_state == 1:
+		 rospy.loginfo("traffic light color from classification is GREEN")	
                  return TrafficLight.GREEN
             elif color_state == 2:
+		 rospy.loginfo("traffic light color from classification is YELLOW")
                  return TrafficLight.YELLOW
             elif color_state == 3:
+		 rospy.loginfo("traffic light color from classification is RED")
                  return TrafficLight.RED
-                    
+        rospy.loginfo("traffic light color from classification is UNKNOWN")                    
         return TrafficLight.UNKNOWN
 
