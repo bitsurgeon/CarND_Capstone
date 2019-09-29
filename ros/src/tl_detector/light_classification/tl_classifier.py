@@ -14,7 +14,7 @@ class TLClassifier(object):
         else:
             PATH_TO_FROZEN_GRAPH = 'light_classification/model/sim_model/'
         FROZEN_GRAPH = PATH_TO_FROZEN_GRAPH + 'frozen_inference_graph.pb'
-	rospy.loginfo("loading classification graph............")
+        rospy.loginfo("loading classification graph............")
         self.graph = tf.Graph()
         with self.graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -29,32 +29,6 @@ class TLClassifier(object):
             self.detection_classes = self.graph.get_tensor_by_name('detection_classes:0')
         rospy.loginfo("loaded graph............")
         self.sess = tf.Session(graph=self.graph)
-
-
-    def to_image_coords(self, boxes, height, width):
-        """
-        The original box coordinate output is normalized, i.e [0, 1].
-        
-        This converts it back to the original coordinate based on the image
-        size.
-        """
-        box_coords = np.zeros_like(boxes)
-        box_coords[:, 0] = boxes[:, 0] * height
-        box_coords[:, 1] = boxes[:, 1] * width
-        box_coords[:, 2] = boxes[:, 2] * height
-        box_coords[:, 3] = boxes[:, 3] * width
-        
-        return box_coords
-
-
-    def draw_boxes(self, image, boxes, classes, scores):
-        """Draw bounding boxes on the image"""
-        for i in range(len(boxes)):
-            top, left, bot, right = boxes[i, ...]
-            cv2.rectangle(image, (left, top), (right, bot), (255,0,0), 3)
-            text = LIGHTS[int(classes[i])-1] + ': ' + str(int(scores[i]*100)) + '%'
-            cv2.putText(image , text, (left, int(top - 5)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (200,0,0), 1, cv2.LINE_AA)
-            #cv2.putText(image , text, (10, int(50 + i * 30)), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (200,0,0), 1, cv2.LINE_AA)
 
     def filter_boxes(self, min_score, boxes, scores, classes):
         """Return boxes with a confidence >= `min_score`"""
@@ -81,8 +55,8 @@ class TLClassifier(object):
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
         with tf.Session(graph=self.graph) as sess:                
-            # Actual detection.
-	    time0 = time.time()
+            # Actual detection
+            time0 = time.time()
             (boxes, scores, classes) = sess.run([self.detection_boxes, self.detection_scores, self.detection_classes], 
                                                 feed_dict={self.image_tensor: image_np})
 
@@ -106,11 +80,11 @@ class TLClassifier(object):
 		 rospy.loginfo("traffic light color from classification is GREEN")	
                  return TrafficLight.GREEN
             elif color_state == 2:
-		 rospy.loginfo("traffic light color from classification is YELLOW")
-                 return TrafficLight.YELLOW
-            elif color_state == 3:
 		 rospy.loginfo("traffic light color from classification is RED")
                  return TrafficLight.RED
+            elif color_state == 3:
+		 rospy.loginfo("traffic light color from classification is YELLOW")
+                 return TrafficLight.YELLOW
         rospy.loginfo("traffic light color from classification is UNKNOWN")                    
         return TrafficLight.UNKNOWN
 
