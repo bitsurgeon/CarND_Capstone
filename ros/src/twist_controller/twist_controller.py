@@ -16,7 +16,6 @@ class Controller(object):
         self.decel_limit = decel_limit
         self.accel_limit = accel_limit
         self.wheel_radius = wheel_radius
-        
         self.min_speed = 0.1
         
         # steering controller
