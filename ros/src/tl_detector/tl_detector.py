@@ -47,7 +47,7 @@ class TLDetector(object):
 
         self.bridge = CvBridge()
 
-	# decide the classifier for the sim or site
+	    # decide the classifier for the sim or site
         self.light_classifier = TLClassifier(self.config['is_site'])
         self.listener = tf.TransformListener()
 
@@ -56,14 +56,6 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
-
-        # save camera images from simulator 
-        self.img_cnt = 0
-        self.img_r_cnt = 200
-        self.img_y_cnt = 137
-        self.img_g_cnt = 188
-        self.img_u_cnt = 0
-        self.wp_to_car = 100
 
         rospy.spin()
 
@@ -78,7 +70,7 @@ class TLDetector(object):
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoints_tree = KDTree(self.waypoints_2d)
-	rospy.loginfo('created waypoint_tree')
+            rospy.loginfo('created waypoint_tree')
 
         # store these waypoints in KDTree for efficient search of closest waypoint later
         if not self.waypoints_2d:
@@ -121,8 +113,6 @@ class TLDetector(object):
             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
         self.state_count += 1
 
-        self.img_cnt += 1
-
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
@@ -157,7 +147,7 @@ class TLDetector(object):
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         
         #Get classification
-        return self.light_classifier.get_classification(cv_image)
+        return self.light_classifier.get_classification(cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB))
 	
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -206,4 +196,3 @@ if __name__ == '__main__':
         TLDetector()
     except rospy.ROSInterruptException:
         rospy.logerr('Could not start traffic node.')
-
