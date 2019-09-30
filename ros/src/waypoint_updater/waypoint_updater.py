@@ -25,7 +25,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 # * Number of waypoints we will publish, change to smaller for smoother simulator experience
-LOOKAHEAD_WPS = 80
+LOOKAHEAD_WPS = 100
 MAX_DECEL = 0.5
 
 class WaypointUpdater(object):
@@ -51,7 +51,7 @@ class WaypointUpdater(object):
 
     def loop(self):
         # * waypoints publishing rate, change to smaller for smoother simulator experience
-        rate = rospy.Rate(30)
+        rate = rospy.Rate(50)
         while not rospy.is_shutdown():
             if self.pose and self.waypoints_tree:
                 # get the closest waypoint
