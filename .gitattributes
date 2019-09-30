@@ -17,7 +17,3 @@
 # Denote all files that are truly binary and should not be modified.
 *.png binary
 *.jpg binary
-
-# Large File Storage
-*.pb filter=lfs diff=lfs merge=lfs -text
-*.pbtxt filter=lfs diff=lfs merge=lfs -text
