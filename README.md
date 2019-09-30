@@ -1,8 +1,8 @@
-# Udacity Capstone Project Team Doudoufei
-> This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
+# Udacity Capstone Project
+This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car. For more information about the project, see the project introduction [here](https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/462c933d-9f24-42d3-8bdc-a08a5fc866e4/concepts/5ab4b122-83e6-436d-850f-9f4d26627fd9).
 
-Team member:
-* Yongzhi Liu
+## Team Doudoufei
+* Yongzhi Liu (Team leader)
 * Yan Zhang
 * Yanyan PENG
 * Rajiv Sreedhar
@@ -43,8 +43,28 @@ In this project, the perception is mainly from camera images for traffic light d
 
 The traffic light detection node is within the tl_detector.py, and the traffic light classification node is within /tl_detector/light_classification_model/tl_classfier.py.
 
+To reduce the latency, we only allow the traffic light classification when the car is within 300 waypoints away from the closest traffic light.
+
 <a name="tl-classification"></a>
 #### Traffic Light Classification
+The traffic light classification is more complicated than the deep learning and transfer learning we did in the course. The input camera images for the simulator or for the site test are not previously provided by Udacity. We chose to train our classification model based on existing object detection models such as ResNet and MobileNet that have already been tested and used successfully. These models can detect the traffic light box but cannot tell the color.
+
+We have learned a lot about how to prepare data and training data from [Tensorflow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) and these past Udacity students.
+* [Jose Horas](https://github.com/josehoras/Self-Driving-Car-Nanodegree-Capstone)
+* [Marco Marasca](https://github.com/marcomarasca/SDCND-Traffic-Light-Detection)
+
+The images from simulator and test site are very different. Our traffic classification use one model for the simulator and one model for the test site. The training of the model includes three steps:
+* Collecting images:
+  * simulator: use the state of the /vehicle/traffic_lights in the simulator to get the ground truth images.
+  * site: the images are from the rosbag.
+
+* Labelling images: We used [LabelImg](https://github.com/tzutalin/labelImg) to label the collected images.
+
+* Converting to TFRecord file: To use our own dataset in Tensorflow Object Detection API, we must convert it into the [TFRecord file format](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/using_your_own_dataset.md).
+
+* Training the model 
+
+
 
 <a name="planning"></a>
 ### Planning 
@@ -52,7 +72,7 @@ The traffic light detection node is within the tl_detector.py, and the traffic l
 The path planning for this project is simply to produce a trajectory that obeys the traffic light. The resulting waypoints
 are the green points ahead of the car as shown in the snapshot below.
 
-![final waypoints](imgs/final-waypoints.jpg)
+![final waypoints](imgs/waypoints.JPG)
 
 
 #### Waypoint Loader

@@ -11,8 +11,6 @@ import tf
 import cv2
 import yaml
 from scipy.spatial import KDTree
-
-from scipy.spatial import KDTree
 import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
@@ -48,7 +46,9 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+
+	# decide the classifier for the sim or site
+        self.light_classifier = TLClassifier(self.config['is_site'])
         self.listener = tf.TransformListener()
 
         self.has_image = False
@@ -115,7 +115,7 @@ class TLDetector(object):
                 self.upcoming_red_light_pub.publish(Int32(self.last_wp))
             self.state_count += 1
 
-    def get_closest_waypoint(self, x, y, isAhead=True):
+    def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -138,23 +138,19 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+#### Uncomment this for the ground truth
 #        return light.state
+
+#### Integrate the traffic light classification here
         if(not self.has_image):
             self.prev_light_loc = None
             return False
-
+        print("Has image.......................")  
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-
-        if light.state == TrafficLight.YELLOW:
-            cv2.imwrite('sim_images/yellow/cam_img_' + str(self.img_cnt) + '.png', cv_image)
-        if light.state == TrafficLight.RED:
-            cv2.imwrite('sim_images/red/cam_img_' + str(self.img_cnt) + '.png', cv_image)
-        if light.state == TrafficLight.GREEN:
-            cv2.imwrite('sim_images/green/cam_img_' + str(self.img_cnt) + '.png', cv_image)
         
         #Get classification
         return self.light_classifier.get_classification(cv_image)
-
+	
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
             location and color
@@ -188,7 +184,8 @@ class TLDetector(object):
                         diff = idx_diff
                         closest_light = light
                         line_wp_idx = temp_line_wp_idx
-                        
+
+        # when the car is approaching the closest light within 300 waypoints ahead                
         if closest_light and diff < 300:
             rospy.loginfo("car approaching traffic light............")
             state = self.get_light_state(closest_light)
