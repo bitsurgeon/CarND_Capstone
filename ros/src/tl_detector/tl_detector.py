@@ -12,7 +12,6 @@ import cv2
 import yaml
 from scipy.spatial import KDTree
 import numpy as np
-from tl_extractor import TLExtractor
 
 STATE_COUNT_THRESHOLD = 3
 
