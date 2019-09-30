@@ -2,23 +2,18 @@
 
 import tensorflow as tf
 import numpy as np
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageColor
 
 # Set inference graph files.
-# using MobileNet SSD pretrained model from Google
-SSD_GRAPH_FILE = 'model/ssd_mobilenet_v1_coco_11_06_2017/frozen_inference_graph.pb'
-
-# class ID for traffic light in SSD_GRAPH_FILE
-TL_CLASS_ID = 10
-
-COLOR_LIST = sorted([c for c in ImageColor.colormap.keys()])
+SSD_GRAPH_FILE_SITE = 'model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SIMULATOR = 'model/sim_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
 
 class TLExtractor(object):
-    def __init__(self):
+    def __init__(self, is_site):
         # Load inference graph.
-        self.detection_graph = self.load_graph(SSD_GRAPH_FILE)
+        if is_site:
+            self.detection_graph = self.load_graph(SSD_GRAPH_FILE_SITE)
+        else:
+            self.detection_graph = self.load_graph(SSD_GRAPH_FILE_SIMULATOR)
 
         # The input placeholder for the image.
         # `get_tensor_by_name` returns the Tensor with the associated name in the Graph.
@@ -48,30 +43,6 @@ class TLExtractor(object):
 
         return filtered_boxes, filtered_scores, filtered_classes
 
-    def to_image_coords(self, boxes, height, width):
-        """
-        The original box coordinate output is normalized, i.e [0, 1].
-        
-        This converts it back to the original coordinate based on the image
-        size.
-        """
-        box_coords = np.zeros_like(boxes)
-        box_coords[:, 0] = boxes[:, 0] * height
-        box_coords[:, 1] = boxes[:, 1] * width
-        box_coords[:, 2] = boxes[:, 2] * height
-        box_coords[:, 3] = boxes[:, 3] * width
-
-        return box_coords
-
-    def draw_boxes(self, image, boxes, classes, thickness=4):
-        """Draw bounding boxes on the image"""
-        draw = ImageDraw.Draw(image)
-        for i in range(len(boxes)):
-            bot, left, top, right = boxes[i, ...]
-            class_id = int(classes[i])
-            color = COLOR_LIST[class_id]
-            draw.line([(left, top), (left, bot), (right, bot), (right, top), (left, top)], width=thickness, fill=color)
-
     def load_graph(self, graph_file):
         """Loads a frozen inference graph"""
         graph = tf.Graph()
@@ -84,16 +55,7 @@ class TLExtractor(object):
 
         return graph
     
-    def crop_boxes(self, image, boxes, classes, target):
-        """Crop bounding boxes on the image that first matching target"""
-        for i in range(len(boxes)):
-            bot, left, top, right = boxes[i, ...]
-            class_id = int(classes[i])
-            if class_id == target:
-                return image.crop((left, bot, right, top))
-        return False
-
-    def extract_traffic_light_image(self, image, confidence_cutoff=0.9):
+    def extract_traffic_light_image(self, image, confidence_cutoff=0.8):
         """Extract traffic light from camera image."""
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
 
@@ -110,27 +72,15 @@ class TLExtractor(object):
             # Filter boxes with a confidence score less than `confidence_cutoff`
             boxes, scores, classes = self.filter_boxes(confidence_cutoff, boxes, scores, classes)
 
-            # The current box coordinates are normalized to a range between 0 and 1.
-            # This converts the coordinates actual location on the image.
-            width, height = image.size
-            box_coords = self.to_image_coords(boxes, height, width)
-
-            # # Each class with be represented by a differently colored box
-            # self.draw_boxes(image, box_coords, classes)
-
-            # Crop traffic light
-            image_crop = self.crop_boxes(image, box_coords, classes, target=TL_CLASS_ID)
-
-        return image_crop
+        return (classes, scores)
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
 
-    image = Image.open('./model/tl_r.jpg')
-    # image = Image.open('./model/tl_g.jpg')
-    image_crop = TLExtractor().extract_traffic_light_image(image)
-    if image_crop:
-        plt.style.use('ggplot')
-        plt.figure(figsize=(12, 8))
-        plt.imshow(image_crop)
-        plt.show()
+    from PIL import Image
+
+    image = Image.open('./model/rosbag_sample.jpg')
+
+    classes, scores = TLExtractor().extract_traffic_light_image(image)
+
+    print classes
+    print scores

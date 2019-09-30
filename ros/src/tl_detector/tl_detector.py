@@ -16,7 +16,6 @@ import numpy as np
 from tl_extractor import TLExtractor
 
 STATE_COUNT_THRESHOLD = 3
-IMG_SKIP = 2
 
 class TLDetector(object):
     def __init__(self):
@@ -49,15 +48,22 @@ class TLDetector(object):
 
         self.bridge = CvBridge()
         self.light_classifier = TLClassifier()
-        self.light_extractor = TLExtractor()
+        self.light_extractor = TLExtractor(self.config['is_site'])
         self.listener = tf.TransformListener()
 
         self.has_image = False
-        self.img_cnt = -1
         self.state = TrafficLight.UNKNOWN
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
+
+        # save camera images from simulator 
+        self.img_cnt = 0
+        self.img_r_cnt = 200
+        self.img_y_cnt = 137
+        self.img_g_cnt = 188
+        self.img_u_cnt = 0
+        self.wp_to_car = 100
 
         rospy.spin()
 
@@ -86,34 +92,30 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        self.has_image = True
+        self.camera_image = msg
+        
+        light_wp, state = self.process_traffic_lights()
+
+        '''
+        Publish upcoming red lights at camera /image_color topic frequency.
+        Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
+        of times till we start using it. Otherwise the previous stable state is
+        used.
+        '''
+        if self.state != state:
+            self.state_count = 0
+            self.state = state
+        elif self.state_count >= STATE_COUNT_THRESHOLD:
+            self.last_state = self.state
+            light_wp = light_wp if state == TrafficLight.RED else -1
+            self.last_wp = light_wp
+            self.upcoming_red_light_pub.publish(Int32(light_wp))
+        else:
+            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+        self.state_count += 1
+
         self.img_cnt += 1
-        if (np.mod(self.img_cnt, IMG_SKIP) == 0):
-            self.has_image = True
-            self.camera_image = msg
-            
-            # dump camera image for model training
-            cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-            cv2.imwrite('debug/cam_img_' + str(self.img_cnt) + '.png', cv_image)
-
-            light_wp, state = self.process_traffic_lights()
-
-            '''
-            Publish upcoming red lights at camera frequency.
-            Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
-            of times till we start using it. Otherwise the previous stable state is
-            used.
-            '''
-            if self.state != state:
-                self.state_count = 0
-                self.state = state
-            elif self.state_count >= STATE_COUNT_THRESHOLD:
-                self.last_state = self.state
-                light_wp = light_wp if state == TrafficLight.RED else -1
-                self.last_wp = light_wp
-                self.upcoming_red_light_pub.publish(Int32(light_wp))
-            else:
-                self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-            self.state_count += 1
 
     def get_closest_waypoint(self, x, y, isAhead=True):
         """Identifies the closest path waypoint to the given position
@@ -157,22 +159,48 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        # # for simulator testing only
-        # return light.state
-
-        # for real life classification
+        
+        # process site traffic light
         if(not self.has_image):
             self.prev_light_loc = None
             return False
 
-        # matching image format for TLExtractor
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        classes, scores = TLExtractor().extract_traffic_light_image(cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB))
 
-        # extract traffic light
-        tl_image = TLExtractor().extract_traffic_light_image(cv_image)
-
-        # Get classification
-        return self.light_classifier.get_classification(tl_image)
+        if not self.config['is_site']:
+            # save simulator traffic light images
+            if (False and self.wp_to_car < 100):
+                # capture simulator camera images for training
+                cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+                path_prefix = 'debug/sim/'
+                if light.state == TrafficLight.RED:
+                    path_prefix += 'r/'
+                    cv2.imwrite(path_prefix + str(self.img_r_cnt) + '.png', cv_image)
+                    self.img_r_cnt += 1
+                elif light.state == TrafficLight.YELLOW:
+                    path_prefix += 'y/'
+                    cv2.imwrite(path_prefix + str(self.img_y_cnt) + '.png', cv_image)
+                    self.img_y_cnt += 1
+                elif light.state == TrafficLight.GREEN:
+                    path_prefix += 'g/'
+                    cv2.imwrite(path_prefix + str(self.img_g_cnt) + '.png', cv_image)
+                    self.img_g_cnt += 1
+            if (False):
+                cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+                path_prefix = 'debug/sim/u/'
+                cv2.imwrite(path_prefix + str(self.img_cnt) + '.png', cv_image)
+        
+        if classes is None:
+            return TrafficLight.UNKNOWN
+        elif classes[0] == 1:
+            return TrafficLight.GREEN
+        elif classes[0] == 2:
+            return TrafficLight.RED
+        elif classes[0] == 3:
+            return TrafficLight.YELLOW
+        
+        return False
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -206,6 +234,7 @@ class TLDetector(object):
                     diff = idx_diff
                     closest_light = light
                     line_wp_idx = temp_line_wp_idx
+                    self.wp_to_car = diff
         
         if closest_light:
             state = self.get_light_state(closest_light)
