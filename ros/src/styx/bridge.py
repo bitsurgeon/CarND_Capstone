@@ -45,6 +45,11 @@ class Bridge(object):
         self.angular_vel = 0.
         self.bridge = CvBridge()
 
+        # interval to publish camera image to '/image_color' topic
+        # this is to reduce delay when runing with simulator
+        self.cam_interval = 3
+        self.cam_cnt = 0
+
         self.callbacks = {
             '/vehicle/steering_cmd': self.callback_steering,
             '/vehicle/throttle_cmd': self.callback_throttle,
@@ -175,12 +180,18 @@ class Bridge(object):
         self.publishers['dbw_status'].publish(Bool(data))
 
     def publish_camera(self, data):
-        imgString = data["image"]
-        image = PIL_Image.open(BytesIO(base64.b64decode(imgString)))
-        image_array = np.asarray(image)
+        if self.cam_cnt == 0:
+            self.cam_cnt = self.cam_interval
 
-        image_message = self.bridge.cv2_to_imgmsg(image_array, encoding="rgb8")
-        self.publishers['image'].publish(image_message)
+            # publish camera image
+            imgString = data["image"]
+            image = PIL_Image.open(BytesIO(base64.b64decode(imgString)))
+            image_array = np.asarray(image)
+
+            image_message = self.bridge.cv2_to_imgmsg(image_array, encoding="rgb8")
+            self.publishers['image'].publish(image_message)
+        else:
+            self.cam_cnt -= 1
 
     def callback_steering(self, data):
         self.server('steer', data={'steering_angle': str(data.steering_wheel_angle_cmd)})
