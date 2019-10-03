@@ -6,8 +6,8 @@ import rospy
 import time
 
 # Set inference graph files.
-SSD_GRAPH_FILE_SITE = '../model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
-SSD_GRAPH_FILE_SIMULATOR = '../model/sim_ssd_inception_v2_coco_2018_01_28_xxxxx_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SITE = 'light_classification/model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v2_coco_2018_03_29_28930_v1_4/frozen_inference_graph.pb'
 
 class TLClassifier(object):
     def __init__(self, is_site):
@@ -93,8 +93,9 @@ if __name__ == '__main__':
 
     from PIL import Image
 
-    image = Image.open('../model/rosbag_sample.jpg')
+    # run 'python light_classification/tl_classifier.py'
+    # site
+    print TLClassifier(True).get_classification(Image.open('light_classification/model/rosbag_sample.jpg'))
 
-    isSite = True
-
-    print TLClassifier(isSite).get_classification(image)
+    # sim
+    print TLClassifier(False).get_classification(Image.open('light_classification/model/sim_sample.png'))
