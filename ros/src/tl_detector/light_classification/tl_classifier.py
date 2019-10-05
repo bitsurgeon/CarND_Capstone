@@ -58,12 +58,12 @@ class TLClassifier(object):
 
         with tf.Session(graph=self.graph) as sess:
             # Actual detection
-            time0 = time.time()
+            # time0 = time.time()
             (boxes, scores, classes) = sess.run([self.detection_boxes, self.detection_scores, self.detection_classes], 
                                                 feed_dict={self.image_tensor: image_np})
 
-            time1 = time.time()
-            print("Prediction time in milliseconds", (time1 - time0) * 1000)
+#             time1 = time.time()
+#             print("Prediction time in milliseconds", (time1 - time0) * 1000)
 
             # Remove unnecessary dimensions
             boxes = np.squeeze(boxes)

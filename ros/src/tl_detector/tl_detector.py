@@ -71,7 +71,7 @@ class TLDetector(object):
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoints_tree = KDTree(self.waypoints_2d)
 
-            rospy.loginfo('created waypoint_tree')
+            # rospy.loginfo('created waypoint_tree')
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -137,7 +137,7 @@ class TLDetector(object):
         if(not self.has_image):
             self.prev_light_loc = None
             return False
-        print("Has image.......................")  
+        # print("Has image.......................")  
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         
         #Get classification
