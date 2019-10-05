@@ -14,6 +14,7 @@ from scipy.spatial import KDTree
 import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
+CAM_ACTIVATION_DIST = 100 # waypoints, this should be >= LOOKAHEAD_WPS in the waypoint_updater.py
 
 class TLDetector(object):
     def __init__(self):
@@ -64,12 +65,6 @@ class TLDetector(object):
     def waypoints_cb(self, waypoints):
         # store the base wayppoints
         self.waypoints = waypoints
-        # store these waypoints in KDTree for efficient search of closest
-        # waypoint later
-        if not self.waypoints_2d:
-            self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
-            self.waypoints_tree = KDTree(self.waypoints_2d)
-            rospy.loginfo('created waypoint_tree')
 
         # store these waypoints in KDTree for efficient search of closest waypoint later
         if not self.waypoints_2d:
@@ -183,8 +178,8 @@ class TLDetector(object):
                         line_wp_idx = temp_line_wp_idx
 
         # when the car is approaching the closest light within 300 waypoints ahead                
-        if closest_light and diff < 300:
-            # rospy.loginfo("car approaching traffic light............")
+        if closest_light and diff < CAM_ACTIVATION_DIST:
+            rospy.loginfo("car approaching traffic light............")
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
