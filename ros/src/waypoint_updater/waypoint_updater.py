@@ -25,8 +25,8 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 # * Number of waypoints we will publish, change to smaller for smoother simulator experience
-LOOKAHEAD_WPS = 100
-MAX_DECEL = 0.5
+LOOKAHEAD_WPS = 75
+MAX_DECEL = 3.5
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -82,15 +82,7 @@ class WaypointUpdater(object):
 
         return closest_idx
 
-    def publish_waypoints(self, closest_idx):
-        # # ignore the traffic light
-        # lane = Lane()
-        # lane.header = self.base_waypoints.header
-        # # take the required waypoints ahead of the car
-        # lane.waypoints = self.base_waypoints.waypoints[closest_idx : closest_idx+LOOKAHEAD_WPS]
-        # self.final_waypoints_pub.publish(lane)
-
-     
+    def publish_waypoints(self, closest_idx):    
         final_lane = self.generate_lane(closest_idx)
         self.final_waypoints_pub.publish(final_lane)
 
@@ -105,6 +97,7 @@ class WaypointUpdater(object):
             lane.waypoints = base_waypoints
         else:
             # if red light, then brake to the stop line
+            base_waypoints = self.base_waypoints.waypoints[closest_idx:self.stopline_wp_idx]
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 
         return lane
@@ -117,7 +110,7 @@ class WaypointUpdater(object):
             p.pose = wp.pose
 
             # calculate in how many waypoints, the car need to stop
-            stop_idx = max(self.stopline_wp_idx - closest_idx - 2, 0) #2  waypoints back for the car nose stop before the stop line.
+            stop_idx = max(self.stopline_wp_idx - closest_idx - 3, 0) # 3 waypoints back for the car nose stop before the stop line.
 
             # the distance between the waypoint to the stop waypoint
             dist = self.distance(waypoints, i, stop_idx)
@@ -125,7 +118,7 @@ class WaypointUpdater(object):
             # calculate the velocity to achieve 0 velocity, v**2 = 2*a*s
             vel = math.sqrt(2 * MAX_DECEL * dist)
 
-            if vel < 1.0:
+            if vel < 0.3:
                 vel = 0.
 
             # limit possible very high velocity to speed limit
