@@ -105,6 +105,7 @@ class WaypointUpdater(object):
             lane.waypoints = base_waypoints
         else:
             # if red light, then brake to the stop line
+            base_waypoints = self.base_waypoints.waypoints[closest_idx:self.stopline_wp_idx]
             lane.waypoints = self.decelerate_waypoints(base_waypoints, closest_idx)
 
         return lane

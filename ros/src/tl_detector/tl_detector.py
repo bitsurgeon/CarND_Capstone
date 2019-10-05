@@ -76,7 +76,7 @@ class TLDetector(object):
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoints_tree = KDTree(self.waypoints_2d)
 
-            rospy.loginfo('created waypoint_tree')
+            # rospy.loginfo('created waypoint_tree')
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
@@ -142,7 +142,7 @@ class TLDetector(object):
         if(not self.has_image):
             self.prev_light_loc = None
             return False
-        print("Has image.......................")  
+        # print("Has image.......................")  
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
         
         #Get classification
@@ -184,7 +184,7 @@ class TLDetector(object):
 
         # when the car is approaching the closest light within 300 waypoints ahead                
         if closest_light and diff < 300:
-            rospy.loginfo("car approaching traffic light............")
+            # rospy.loginfo("car approaching traffic light............")
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
