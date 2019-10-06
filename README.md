@@ -70,7 +70,7 @@ We have learned a lot about how to prepare data and training model from [Tensorf
 - [Jose Horas](https://github.com/josehoras/Self-Driving-Car-Nanodegree-Capstone)
 - [Marco Marasca](https://github.com/marcomarasca/SDCND-Traffic-Light-Detection)
 
-The images from simulator and test site are very different in terms of shape and position. Our traffic classification use one model for the simulator and one model for the test site. The training of the model includes three steps:
+The images from simulator and test site are very different in terms of shape and position. Our traffic classification use one model for the simulator and one model for the test site. The training of the model includes five steps:
 
 * Collecting Images:
   * simulator: use the state of the /vehicle/traffic_lights in the simulator to get the ground truth images.
@@ -84,6 +84,9 @@ The images from simulator and test site are very different in terms of shape and
 
 * Training Model:
   * Our models get trained on both [AWS](https://aws.amazon.com/) and [GCP](https://cloud.google.com/) to speed up the overall process.
+
+* Export Model:
+  * Models have to be exported for Tensorflow v1.4 to work with capstone project environment and Carla.
 
 <a name="planning"></a>
 ### Planning 
