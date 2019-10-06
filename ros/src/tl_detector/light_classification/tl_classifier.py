@@ -7,7 +7,8 @@ import time
 
 # Set inference graph files.
 SSD_GRAPH_FILE_SITE = 'light_classification/model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
-SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v2_coco_2018_03_29_28930_v1_4/frozen_inference_graph.pb'
+# SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v2_coco_2018_03_29_28930_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
 
 class TLClassifier(object):
     def __init__(self, is_site):
@@ -62,8 +63,8 @@ class TLClassifier(object):
             (boxes, scores, classes) = sess.run([self.detection_boxes, self.detection_scores, self.detection_classes], 
                                                 feed_dict={self.image_tensor: image_np})
 
-#             time1 = time.time()
-#             print("Prediction time in milliseconds", (time1 - time0) * 1000)
+            # time1 = time.time()
+            # print("Prediction time in milliseconds", (time1 - time0) * 1000)
 
             # Remove unnecessary dimensions
             boxes = np.squeeze(boxes)
