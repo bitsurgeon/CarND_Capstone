@@ -131,7 +131,7 @@ class TLDetector(object):
 
         """
 #### Uncomment this for the ground truth
-#        return light.state
+        # return light.state
 
 #### Integrate the traffic light classification here
         if(not self.has_image):
@@ -179,7 +179,7 @@ class TLDetector(object):
 
         # when the car is approaching the closest light within 300 waypoints ahead                
         if closest_light and diff < CAM_ACTIVATION_DIST:
-            rospy.loginfo("car approaching traffic light............")
+            # rospy.loginfo("car approaching traffic light............")
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
