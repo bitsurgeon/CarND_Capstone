@@ -66,9 +66,7 @@ To reduce the latency, we only allow the traffic light classification when the c
 
 The traffic light classification is more complicated than the deep learning and transfer learning we did in the course. The input camera images for the simulator or for the site test are not previously provided by Udacity. We chose to train our classification model based on existing object detection models such as MobileNet that have already been tested and used successfully. These models can detect the traffic light box but cannot tell the color.
 
-We have learned a lot about how to prepare data and training model from [Tensorflow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) and got inspired from these past Udacity fellow students:
-- [Jose Horas](https://github.com/josehoras/Self-Driving-Car-Nanodegree-Capstone)
-- [Marco Marasca](https://github.com/marcomarasca/SDCND-Traffic-Light-Detection)
+We have learned a lot about how to prepare data and training model from [Tensorflow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection) and got inspired from these past Udacity fellow students ([Jose](https://github.com/josehoras/Self-Driving-Car-Nanodegree-Capstone) and [Marco](https://github.com/marcomarasca/SDCND-Traffic-Light-Detection)):
 
 The images from simulator and test site are very different in terms of shape and position. Our traffic classification use one model for the simulator and one model for the test site. The training of the model includes five steps:
 
@@ -84,6 +82,9 @@ The images from simulator and test site are very different in terms of shape and
 
 * Training Model:
   * Our models get trained on both [AWS](https://aws.amazon.com/) and [GCP](https://cloud.google.com/) to speed up the overall process.
+  * For more detailed steps, please reference the following repos:
+    * [Yan](https://github.com/yz540/traffic_light_detection) for GCP
+    * [Yongzhi](https://github.com/bitsurgeon/CarND_TrafficLightClassifier) for AWS
 
 * Export Model:
   * Models have to be exported for Tensorflow v1.4 to work with capstone project environment and Carla.
