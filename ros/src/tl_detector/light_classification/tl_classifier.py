@@ -6,9 +6,10 @@ import rospy
 import time
 
 # Set inference graph files.
-SSD_GRAPH_FILE_SITE = 'light_classification/model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
-# SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v2_coco_2018_03_29_28930_v1_4/frozen_inference_graph.pb'
-SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
+#SSD_GRAPH_FILE_SITE = 'light_classification/model/site_ssd_inception_v2_coco_2018_01_28_39747_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SITE = 'light_classification/model/site_ssd_inception_v2_coco_2018_01_28_37306_v1_4/frozen_inference_graph.pb'
+SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v2_coco_2018_03_29_28930_v1_4/frozen_inference_graph.pb'
+# SSD_GRAPH_FILE_SIMULATOR = 'light_classification/model/sim_ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb'
 
 class TLClassifier(object):
     def __init__(self, is_site):
@@ -48,7 +49,7 @@ class TLClassifier(object):
 
         return graph
 
-    def get_classification(self, image, confidence_cutoff=0.7):
+    def get_classification(self, image, confidence_cutoff=0.6):
         """Determines the color of the traffic light in the image
         Args:
             image (cv::Mat): image containing the traffic light
@@ -78,16 +79,16 @@ class TLClassifier(object):
             color_state = int(classes[np.argmax(scores)])
             
             if color_state == 1:
-                rospy.loginfo("traffic light color from classification is GREEN")	
-                return TrafficLight.GREEN
+                rospy.loginfo("traffic light state: GREEN")
+                return TrafficLight.GREEN # 2
             elif color_state == 2:
-                rospy.loginfo("traffic light color from classification is RED")
-                return TrafficLight.RED
+                rospy.loginfo("traffic light state: RED")
+                return TrafficLight.RED # 0
             elif color_state == 3:
-                rospy.loginfo("traffic light color from classification is YELLOW")
-                return TrafficLight.YELLOW
+                rospy.loginfo("traffic light state: YELLOW")
+                return TrafficLight.YELLOW # 1
         
-        rospy.loginfo("traffic light color from classification is UNKNOWN")                    
+        rospy.loginfo("traffic light state: UNKNOWN")
         return TrafficLight.UNKNOWN
 
 if __name__ == '__main__':

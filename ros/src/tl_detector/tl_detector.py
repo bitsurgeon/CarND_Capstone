@@ -13,8 +13,8 @@ import yaml
 from scipy.spatial import KDTree
 import numpy as np
 
-STATE_COUNT_THRESHOLD = 3
-CAM_ACTIVATION_DIST = 100 # waypoints, this should be >= LOOKAHEAD_WPS in the waypoint_updater.py
+STATE_COUNT_THRESHOLD = 2
+CAM_ACTIVATION_DIST = 80 # waypoints, this should be >= LOOKAHEAD_WPS in the waypoint_updater.py
 
 class TLDetector(object):
     def __init__(self):
@@ -177,9 +177,9 @@ class TLDetector(object):
                         closest_light = light
                         line_wp_idx = temp_line_wp_idx
 
-        # when the car is approaching the closest light within 300 waypoints ahead                
+        # when the car is approaching the closest light              
         if closest_light and diff < CAM_ACTIVATION_DIST:
-            # rospy.loginfo("car approaching traffic light............")
+            rospy.loginfo("... approaching [stop_line: %s | diff: %s] ..." % (line_wp_idx, diff))
             state = self.get_light_state(closest_light)
             return line_wp_idx, state
         
